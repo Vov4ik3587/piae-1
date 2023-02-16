@@ -83,7 +83,7 @@ def print_plans(plans):
     pass
 
 
-# %% Пункт 3. Вычисляем критерии для планов 9-12 и записываем полученные данные
+# %% Пункт 3. Вычисляем критерии для планов 9-12 и записываем полученные данные. Далее планы будут проранжированы
 
 plans = (
     Plan('Plan №9', np.array([-1., -0.707, 0., 0.707, 1]), np.array([0.093, 0.248, 0.3178, 0.248, 0.093])),
@@ -103,3 +103,31 @@ for plan in plans:
     plan.mv_criterion = Calculator.MV_criterion(disp_mat)
     plan.g_criterion = Calculator.G_criterion(disp_mat, plan)
 
+# %% Пункт 4. Выбрать один из планов (можно выбрать наилучший), веса выразить в виде функций от q,
+# построить график изменения Л-критерия от q. Определить по графику оптимальное значение q и Л-критерия
+
+spectrum = np.array([-1., -0.683, 0., 0.683, 1.])  # выбранный спектр
+func_p = lambda q: np.array([q, 2.33 * q, 1 - 6.66 * q, 2.33 * q, q])
+
+range_q = np.linspace(0.1, 0.15, 100)
+l_criterion = []
+
+for q in range_q:
+    p_4 = func_p(q)
+    info_mat_4 = sum(np.array(
+        [np.dot(p, np.vstack(Calculator.func(x)) @ np.vstack(Calculator.func(x)).T)
+         for x, p in zip(spectrum, p_4)
+         ]
+    ))
+    disp_mat_4 = np.linalg.inv(info_mat_4)
+    l_criterion.append(Calculator.L_criterion(disp_mat_4))
+l_criterion = np.array(l_criterion)
+plt.plot(range_q, l_criterion)
+plt.xlabel('q')
+plt.ylabel('L')
+plt.grid(True)
+plt.show()
+
+l_min = np.min(l_criterion)
+q_min = range_q[np.where(l_criterion == l_min)]
+print(f'Минимальное значение Л-критерия: {l_min} достигается при q = {q_min}')
